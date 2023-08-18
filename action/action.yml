@@ -62,9 +62,13 @@ runs:
         echo "release_tag=$version_without_snapshot" >> $GITHUB_OUTPUT
       shell: bash
 
+    - name: Create file
+      shell: bash
+      run: touch test.txt
+
     - name: Push the changes to the specified branch
       run: |
-        git add .
+        # git add .
         git commit -am "Updated Release Version"
         git push
       shell: bash
