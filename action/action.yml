@@ -29,36 +29,36 @@ runs:
     - name: Reterive Current Release Version
       id: get_release_version
       run: |
-        echo "release_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+        echo "release_version=v1.0-SNAPSHOT" >> $GITHUB_OUTPUT
       shell: bash
 
     - name: Update pom.xml version
       id: update_release
       run: |
-        release_version=${{ steps.get_release_version.outputs.release_version }}
-        version_without_snapshot=$(echo )
-        if [[ ${{ inputs.merge-to-branch-name }} == master ]]
-        then
-          if [[ ${{ inputs.branch-name }} == release* ]]
-          then
-            version_without_snapshot="${release_version%-SNAPSHOT}"
-          else
-            version_without_snapshot="${release_version%-${{inputs.branch-name}}}"
-          fi
-        fi
+        # release_version=${{ steps.get_release_version.outputs.release_version }}
+        # version_without_snapshot=$(echo )
+        # if [[ ${{ inputs.merge-to-branch-name }} == master ]]
+        # then
+        #   if [[ ${{ inputs.branch-name }} == release* ]]
+        #   then
+        #     version_without_snapshot="${release_version%-SNAPSHOT}"
+        #   else
+        #     version_without_snapshot="${release_version%-${{inputs.branch-name}}}"
+        #   fi
+        # fi
 
-        if [[ ${{ inputs.merge-to-branch-name }} == develop ]]
-        then
-          if [[ ${{ inputs.branch-name }} == release* ]]
-          then
-            version_without_snapshot="${release_version%-SNAPSHOT}"
-          else
-            version_without_snapshot="${release_version%-${{inputs.branch-name}}}"
-          fi
-          version_without_snapshot=${version_without_snapshot}-DEV
-        fi
-
-        mvn versions:set -DnewVersion=$version_without_snapshot
+        # if [[ ${{ inputs.merge-to-branch-name }} == develop ]]
+        # then
+        #   if [[ ${{ inputs.branch-name }} == release* ]]
+        #   then
+        #     version_without_snapshot="${release_version%-SNAPSHOT}"
+        #   else
+        #     version_without_snapshot="${release_version%-${{inputs.branch-name}}}"
+        #   fi
+        #   version_without_snapshot=${version_without_snapshot}-DEV
+        # fi
+        version_without_snapshot=v1.0
+        # mvn versions:set -DnewVersion=$version_without_snapshot
         echo "release_tag=$version_without_snapshot" >> $GITHUB_OUTPUT
       shell: bash
 
