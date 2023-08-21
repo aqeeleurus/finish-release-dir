@@ -68,7 +68,7 @@ runs:
 
     - name: Push the changes to the specified branch
       run: |
-        echo "aakfjla" > test.txt
+        echo "aakfjla" > hello.txt
         git add .
         git commit -am "Updated Release Version"
         git push
