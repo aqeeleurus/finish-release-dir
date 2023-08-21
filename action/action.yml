@@ -81,7 +81,7 @@ runs:
         branch: ${{ inputs.branch-name }}
         base: ${{ inputs.merge-to-branch-name }}
         token: ${{ inputs.token }}
-        delete-branch: true
+        # delete-branch: true
         title: Merge ${{ inputs.branch-name }} into ${{ inputs.merge-to-branch-name }} branch
         body: |
           This PR merges the ${{ inputs.branch-name }} into ${{ inputs.merge-to-branch-name }}.
