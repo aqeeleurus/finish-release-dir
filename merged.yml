@@ -15,6 +15,32 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Extract version from branch name (for release branches)
+      if: startsWith(github.ref_name, 'release/')
+      run: |
+        BRANCH_NAME="${{ github.ref_name }}"
+        VERSION=${BRANCH_NAME#release/}
+        
+        echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+          
+    - name: Extract version from branch name (for hotfix branches)
+      if: startsWith(github.ref_name, 'hotfix/')
+      run: |
+        BRANCH_NAME="${{ github.ref_name }}"
+        VERSION=${BRANCH_NAME#hotfix/}
+        
+        echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+          
+    - name: Validate a target release version
+      run: |
+        TARGET_VERSION="${{ env.RELEASE_VERSION }}"
+        
+        if [ -z "${TARGET_VERSION}" ]; then
+          echo "::error::You are trying to merge a branch that is not a release specific, please execute against a branch that matches the following patterns: release/*, hotfix/* "
+          exit 1
+        fi
+      shell: bash
+      
     - name: Checkout code
       uses: actions/checkout@v3
       with:

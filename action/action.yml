@@ -76,7 +76,7 @@ runs:
 
     - name: Create a new pull request
       id: create-pr
-      uses: peter-evans/create-pull-request@v4
+      uses: peter-evans/create-pull-request@v5
       with:
         branch: ${{ inputs.branch-name }}
         base: ${{ inputs.merge-to-branch-name }}
