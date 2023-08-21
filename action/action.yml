@@ -75,10 +75,10 @@ runs:
       shell: bash
 
     - name: Create a new pull request
-      id: create-pr
+      id: create_pr
       uses: peter-evans/create-pull-request@v5
       with:
-        branch: ${{ inputs.branch-name }}
+        branch: "merge/${{ inputs.branch-name }}"
         base: ${{ inputs.merge-to-branch-name }}
         token: ${{ inputs.token }}
         # delete-branch: true
