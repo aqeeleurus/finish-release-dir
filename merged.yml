@@ -1,0 +1,93 @@
+name: Finish Release
+Descripion: "Finish Release"
+
+inputs:
+  branch-name:
+    description: 'Name of the branch'
+    required: true
+  merge-to-branch-name:
+    description: 'Merge to branch name'
+    required: true
+  token:
+    description: 'Github token secret'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.branch-name }}
+
+    - name: Initialize mandatory git config
+      run: |
+        git config user.name "GitHub actions"
+        git config user.email noreply@github.com
+      shell: bash
+
+    - name: Reterive Current Release Version
+      id: get_release_version
+      run: |
+        echo "release_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Update pom.xml version
+      id: update_release
+      run: |
+        release_version=${{ steps.get_release_version.outputs.release_version }}
+        version_without_snapshot=$(echo )
+        if [[ ${{ inputs.merge-to-branch-name }} == master ]]
+        then
+          if [[ ${{ inputs.branch-name }} == release* ]]
+          then
+            version_without_snapshot="${release_version%-SNAPSHOT}"
+          else
+            version_without_snapshot="${release_version%-${{inputs.branch-name}}}"
+          fi
+        fi
+
+        if [[ ${{ inputs.merge-to-branch-name }} == develop ]]
+        then
+          if [[ ${{ inputs.branch-name }} == release* ]]
+          then
+            version_without_snapshot="${release_version%-SNAPSHOT}"
+          else
+            version_without_snapshot="${release_version%-${{inputs.branch-name}}}"
+          fi
+          version_without_snapshot=${version_without_snapshot}-DEV
+        fi
+
+        mvn versions:set -DnewVersion=$version_without_snapshot
+        echo "release_tag=$version_without_snapshot" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Push the changes to the specified branch
+      run: |
+        git commit -am "Updated Release Version"
+        git push
+      shell: bash
+    
+    - name: Create a new pull request
+      id: create-pr
+      uses: peter-evans/create-pull-request@v4
+      with:
+        branch: ${{ inputs.branch-name }}
+        base: ${{ inputs.merge-to-branch-name }}
+        token: ${{ inputs.token }}
+        delete-branch: true
+        title: Merge ${{ inputs.branch-name }} into ${{ inputs.merge-to-branch-name }} branch
+        body: |
+          This PR merges the ${{ inputs.branch-name }} into ${{ inputs.merge-to-branch-name }}.
+          This happens to ensure that the updates that happend on the ${{ inputs.branch-name }} branch are also present on the ${{ inputs.merge-to-branch-name }} branch. The PR will auto-merge if there are no conflicts present.
+        labels: |
+          gitflow
+    
+    - name: Auto-merge a pull requests
+      id: automerge-pr
+      uses: "CyberCubeAnalyticsInc/action-automerge@master"
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITFLOW_GITHUB_TOKEN }}"
+        PULL_REQUEST: ${{ steps.create-pr.outputs.pull-request-number }}
+        MERGE_LABELS: "gitflow"
+        MERGE_DELETE_BRANCH: "true"
