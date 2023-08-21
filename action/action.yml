@@ -66,12 +66,13 @@ runs:
     #   shell: bash
     #   run: touch test.txt
 
-    # - name: Push the changes to the specified branch
-    #   run: |
-    #     git add .
-    #     git commit -am "Updated Release Version"
-    #     git push
-    #   shell: bash
+    - name: Push the changes to the specified branch
+      run: |
+        touch test.txt
+        git add .
+        git commit -am "Updated Release Version"
+        git push
+      shell: bash
 
     - name: Create a new pull request
       id: create-pr
